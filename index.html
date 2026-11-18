@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nivel">
+<title>Nivel e inclinómetro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<style>
+:root{--bg:#0f1115;--card:#1a1d24;--card2:#232731;--txt:#eef0f3;--mut:#8a909c;--ok:#34c759;--warn:#ffb020;--acc:#4da3ff;--bad:#ff5a5f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);display:flex;flex-direction:column;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+header{display:flex;gap:8px;padding:12px 12px 8px}
+.tab{flex:1;padding:12px;border:0;border-radius:12px;background:var(--card);color:var(--mut);font-size:17px;font-weight:600}
+.tab.on{background:var(--acc);color:#fff}
+main{flex:1;display:flex;flex-direction:column;padding:0 12px 12px;min-height:0}
+.view{display:none;flex:1;flex-direction:column;gap:10px;min-height:0}
+.view.on{display:flex}
+.card{background:var(--card);border-radius:16px;padding:14px}
+.big{font-size:min(26vw,120px);font-weight:700;line-height:1;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-2px;transition:color .2s}
+.big.ok{color:var(--ok)}
+.sub{text-align:center;color:var(--mut);font-size:16px;margin-top:6px;min-height:20px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.badge{font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;background:var(--card2);color:var(--mut)}
+.badge.on{background:var(--warn);color:#000}
+.badge.st{background:rgba(52,199,89,.18);color:var(--ok)}
+svg{display:block;width:100%;height:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{flex:1 0 auto;min-width:56px;padding:10px 8px;border:0;border-radius:10px;background:var(--card2);color:var(--txt);font-size:16px;font-weight:600}
+.chip.on{background:var(--acc);color:#fff}
+.lbl{font-size:13px;color:var(--mut);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.diff{text-align:center;font-size:22px;font-weight:700;margin-top:10px;min-height:28px}
+.diff.ok{color:var(--ok)}.diff.up{color:var(--warn)}.diff.down{color:var(--warn)}
+.btns{display:flex;gap:8px;margin-top:auto}
+.btn{flex:1;padding:16px;border:0;border-radius:14px;background:var(--card2);color:var(--txt);font-size:17px;font-weight:600}
+.btn.pri{background:var(--acc);color:#fff}
+.btn.hold{background:var(--warn);color:#000}
+.custom{display:flex;gap:6px;margin-top:8px}
+.custom input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #333a46;background:var(--bg);color:var(--txt);font-size:16px}
+/* Nivel */
+.levelwrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.circle{position:relative;width:min(80vw,46vh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#1f2a1f 0%,#18201a 70%,#141915 100%);border:3px solid #2c3a2e;overflow:hidden}
+.circle .ring{position:absolute;left:50%;top:50%;border:2px solid rgba(255,255,255,.18);border-radius:50%;transform:translate(-50%,-50%)}
+.circle .cross{position:absolute;background:rgba(255,255,255,.12)}
+.bubble{position:absolute;left:50%;top:50%;width:18%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#eaffc0,#a4e04a 55%,#6fae1f);box-shadow:0 0 12px rgba(164,224,74,.6);transform:translate(-50%,-50%);will-change:transform}
+.bubble.ok{background:radial-gradient(circle at 35% 35%,#d8ffe0,#34c759 55%,#1f8d3a);box-shadow:0 0 16px rgba(52,199,89,.8)}
+.bar{position:relative;width:92%;height:70px;border-radius:35px;background:linear-gradient(#1f2a1f,#141915);border:3px solid #2c3a2e;overflow:hidden}
+.bar .mk{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.2)}
+.bar .bubble{width:auto;height:70%;aspect-ratio:2/1;border-radius:999px}
+.xy{display:flex;gap:10px}
+.xy .card{flex:1;text-align:center}
+.xy b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
+.xy span{font-size:13px;color:var(--mut)}
+/* Superposiciones */
+.ov{position:fixed;inset:0;background:rgba(10,11,14,.94);display:flex;align-items:center;justify-content:center;padding:24px;z-index:10}
+.ov[hidden]{display:none}
+.ov .box{max-width:420px;width:100%;background:var(--card);border-radius:20px;padding:22px;text-align:center}
+.ov h2{margin:0 0 10px;font-size:22px}
+.ov p{color:var(--mut);font-size:16px;line-height:1.45;margin:0 0 18px}
+.ov .btn{width:100%;margin-top:8px}
+.msg{color:var(--bad);font-size:15px;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <button class="tab on" data-v="bench">Banco</button>
+  <button class="tab" data-v="level">Nivel</button>
+</header>
+
+<main>
+  <!-- BANCO -->
+  <section class="view on" id="v-bench">
+    <div class="card">
+      <div class="row">
+        <span class="badge" id="b-state">Plano</span>
+        <span class="badge" id="b-stable">Moviendo…</span>
+        <span class="badge" id="b-hold">RETENIDO</span>
+      </div>
+      <div class="big" id="b-ang">0,0°</div>
+      <div class="sub" id="b-hint">Pon el móvil boca arriba sobre el respaldo, con la parte de arriba hacia la cabeza</div>
+      <svg viewBox="0 0 240 125" aria-hidden="true">
+        <line x1="10" y1="118" x2="230" y2="118" stroke="#3a404c" stroke-width="3" stroke-linecap="round"/>
+        <line x1="185" y1="80" x2="185" y2="118" stroke="#3a404c" stroke-width="5"/>
+        <line x1="140" y1="80" x2="140" y2="118" stroke="#3a404c" stroke-width="5"/>
+        <line id="s-target" x1="150" y1="80" x2="30" y2="80" stroke="#4da3ff" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" opacity="0"/>
+        <line x1="150" y1="80" x2="210" y2="80" stroke="#cfd3da" stroke-width="10" stroke-linecap="round"/>
+        <line id="s-back" x1="150" y1="80" x2="30" y2="80" stroke="#cfd3da" stroke-width="10" stroke-linecap="round"/>
+        <circle cx="150" cy="80" r="5" fill="#0f1115"/>
+      </svg>
+      <div class="diff" id="b-diff"></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">Ángulo objetivo</div>
+      <div class="chips" id="chips"></div>
+      <div class="custom">
+        <input id="c-val" type="number" inputmode="decimal" step="1" min="-45" max="90" placeholder="Otro ángulo (p. ej. 37)">
+        <button class="chip" id="c-set" style="flex:0 0 auto">Fijar</button>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="btn" id="btn-cal">Calibrar</button>
+      <button class="btn pri" id="btn-hold">Retener</button>
+    </div>
+  </section>
+
+  <!-- NIVEL -->
+  <section class="view" id="v-level">
+    <div class="card">
+      <div class="row">
+        <span class="badge" id="l-mode">Superficie plana</span>
+        <span class="badge" id="l-hold">RETENIDO</span>
+      </div>
+      <div class="big" id="l-ang">0,0°</div>
+      <div class="sub" id="l-hint">Inclinación total</div>
+    </div>
+
+    <div class="levelwrap" id="w-circle">
+      <div class="circle" id="circle">
+        <div class="cross" style="left:50%;top:0;bottom:0;width:2px;transform:translateX(-1px)"></div>
+        <div class="cross" style="top:50%;left:0;right:0;height:2px;transform:translateY(-1px)"></div>
+        <div class="ring" style="width:22%;height:22%"></div>
+        <div class="ring" style="width:55%;height:55%"></div>
+        <div class="bubble" id="bub"></div>
+      </div>
+    </div>
+    <div class="levelwrap" id="w-bar" hidden style="display:none">
+      <div class="bar" id="bar">
+        <div class="mk" style="left:calc(50% - 22px)"></div>
+        <div class="mk" style="left:calc(50% + 20px)"></div>
+        <div class="bubble" id="bbar"></div>
+      </div>
+    </div>
+
+    <div class="xy" id="xy">
+      <div class="card"><b id="l-x">0,0°</b><span>Izquierda / derecha</span></div>
+      <div class="card"><b id="l-y">0,0°</b><span>Arriba / abajo</span></div>
+    </div>
+
+    <div class="btns">
+      <button class="btn" id="btn-cal2">Calibrar</button>
+      <button class="btn pri" id="btn-hold2">Retener</button>
+    </div>
+  </section>
+</main>
+
+<!-- Inicio -->
+<div class="ov" id="ov-start">
+  <div class="box">
+    <h2>Nivel e inclinómetro</h2>
+    <p>Usa el sensor de orientación del móvil. Para medir un banco, pon el móvil boca arriba sobre el respaldo.</p>
+    <button class="btn pri" id="btn-start">Empezar</button>
+    <div class="msg" id="start-msg"></div>
+  </div>
+</div>
+
+<!-- Calibración -->
+<div class="ov" id="ov-cal" hidden>
+  <div class="box">
+    <h2>Calibrar</h2>
+    <p>Pon el móvil boca arriba sobre una superficie plana (el suelo del gimnasio sirve) y sin tocarlo pulsa <b>Calibrar ahora</b>. Así se corrige el desnivel de la cámara o de la funda.</p>
+    <button class="btn pri" id="cal-now">Calibrar ahora</button>
+    <button class="btn" id="cal-reset">Quitar calibración</button>
+    <button class="btn" id="cal-close">Cancelar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const D = Math.PI / 180;
+  const TOL = 1.0;               // tolerancia en grados para dar el objetivo por bueno
+  const TARGETS = [-15, 0, 15, 30, 45, 60, 75, 90];
+
+  let u = null;                  // vector "arriba" filtrado, en coordenadas del móvil
+  let u0 = [0, 0, 1];            // referencia de calibración
+  let target = null;
+  let hold = false;
+  let view = 'bench';
+  let wasOk = false;
+  let gotEvent = false;
+  let hist = [];
+  let wakeLock = null;
+
+  try {
+    const s = JSON.parse(localStorage.getItem('nivel_cfg') || '{}');
+    if (Array.isArray(s.u0) && s.u0.length === 3) u0 = s.u0;
+    if (typeof s.target === 'number') target = s.target;
+  } catch (e) {}
+  function save(){ try { localStorage.setItem('nivel_cfg', JSON.stringify({u0, target})); } catch (e) {} }
+
+  const nf = new Intl.NumberFormat('es-ES', {minimumFractionDigits:1, maximumFractionDigits:1});
+  const fmt = x => nf.format(Math.abs(x) < 0.05 ? 0 : x);
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const dot = (a, b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+
+  // ---------- Sensor ----------
+  function onOri(e){
+    if (e.beta == null || e.gamma == null) return;
+    gotEvent = true;
+    const b = e.beta * D, g = e.gamma * D;
+    const n = [-Math.cos(b)*Math.sin(g), Math.sin(b), Math.cos(b)*Math.cos(g)];
+    if (!u) { u = n; return; }
+    const k = 0.15;
+    u = u.map((v, i) => v + (n[i] - v) * k);
+    const m = Math.hypot(u[0], u[1], u[2]) || 1;
+    u = u.map(v => v / m);
+  }
+
+  async function start(){
+    const msg = $('#start-msg');
+    msg.textContent = '';
+    if (!('DeviceOrientationEvent' in window)) {
+      msg.textContent = 'Este navegador no tiene sensor de orientación. Ábrelo en el móvil.';
+      return;
+    }
+    try {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const r = await DeviceOrientationEvent.requestPermission();
+        if (r !== 'granted') { msg.textContent = 'Sin permiso no se puede leer el sensor. Vuelve a pulsar y elige «Permitir».'; return; }
+      }
+    } catch (e) {
+      msg.textContent = 'No se pudo pedir permiso al sensor. Comprueba que la página se abre por https.';
+      return;
+    }
+    window.addEventListener('deviceorientation', onOri);
+    $('#ov-start').hidden = true;
+    keepAwake();
+    setTimeout(() => {
+      if (!gotEvent) {
+        $('#ov-start').hidden = false;
+        msg.textContent = 'No llegan datos del sensor. Ábrelo en el móvil y por https (no como archivo local).';
+      }
+    }, 2500);
+    requestAnimationFrame(loop);
+  }
+
+  async function keepAwake(){
+    try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && gotEvent) keepAwake(); });
+
+  // ---------- Pantalla ----------
+  function screenAngle(){
+    let a = 0;
+    if (screen.orientation && typeof screen.orientation.angle === 'number') a = screen.orientation.angle;
+    else if (typeof window.orientation === 'number') a = window.orientation;
+    return a * D;
+  }
+  function toScreen(v){
+    const a = screenAngle(), c = Math.cos(a), s = Math.sin(a);
+    return [v[0]*c + v[1]*s, -v[0]*s + v[1]*c];
+  }
+
+  // ---------- Banco ----------
+  function benchAngle(){
+    const th = Math.acos(clamp(dot(u, u0), -1, 1)) / D;
+    const sign = (u[1] - u0[1]) >= 0 ? 1 : -1;
+    return th * sign;
+  }
+
+  function drawBack(el, ang){
+    const L = 120, px = 150, py = 80;
+    const a = ang * D;
+    el.setAttribute('x2', (px - L*Math.cos(a)).toFixed(1));
+    el.setAttribute('y2', (py - L*Math.sin(a)).toFixed(1));
+  }
+
+  let shown = 0;
+  function renderBench(){
+    if (!hold) shown = benchAngle();
+    const a = shown;
+    const big = $('#b-ang');
+    big.textContent = fmt(a) + '°';
+    drawBack($('#s-back'), clamp(a, -40, 95));
+
+    const st = $('#b-state');
+    if (Math.abs(a) < 0.5) st.textContent = 'Plano';
+    else st.textContent = a > 0 ? 'Inclinado' : 'Declinado';
+
+    const t = $('#s-target'), d = $('#b-diff');
+    if (target === null) {
+      t.setAttribute('opacity', '0');
+      d.textContent = ''; d.className = 'diff'; big.classList.remove('ok');
+    } else {
+      t.setAttribute('opacity', '1');
+      drawBack(t, target);
+      const diff = a - target;
+      const ok = Math.abs(diff) <= TOL;
+      big.classList.toggle('ok', ok);
+      if (ok) { d.textContent = '✓ En ' + fmt(target) + '°'; d.className = 'diff ok'; }
+      else if (diff < 0) { d.textContent = '↑ Sube ' + fmt(-diff) + '°'; d.className = 'diff up'; }
+      else { d.textContent = '↓ Baja ' + fmt(diff) + '°'; d.className = 'diff down'; }
+      if (ok && !wasOk && !hold && navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
+      wasOk = ok;
+    }
+
+    // estabilidad
+    hist.push(benchAngle()); if (hist.length > 40) hist.shift();
+    const rng = Math.max(...hist) - Math.min(...hist);
+    const sb = $('#b-stable');
+    if (hist.length >= 40 && rng < 0.3) { sb.textContent = 'Estable'; sb.className = 'badge st'; }
+    else { sb.textContent = 'Moviendo…'; sb.className = 'badge'; }
+  }
+
+  // ---------- Nivel ----------
+  let lshown = {edge:false, total:0, x:0, y:0, dev:0};
+  function renderLevel(){
+    if (!hold) {
+      const edge = Math.abs(u[2]) < 0.6;
+      const s = toScreen(u), s0 = toScreen(u0);
+      if (edge) {
+        const dev0 = Math.atan2(s[0], s[1]) / D;
+        const dev = dev0 - Math.round(dev0 / 90) * 90;
+        lshown = {edge:true, dev};
+      } else {
+        const x = (Math.asin(clamp(s[0], -1, 1)) - Math.asin(clamp(s0[0], -1, 1))) / D;
+        const y = (Math.asin(clamp(s[1], -1, 1)) - Math.asin(clamp(s0[1], -1, 1))) / D;
+        const total = Math.acos(clamp(dot(u, u0), -1, 1)) / D;
+        lshown = {edge:false, total, x, y};
+      }
+    }
+    const L = lshown;
+    const wc = $('#w-circle'), wb = $('#w-bar');
+    if (L.edge) {
+      wc.style.display = 'none'; wb.style.display = 'flex'; $('#xy').style.display = 'none';
+      $('#l-mode').textContent = 'De canto';
+      $('#l-hint').textContent = 'Desviación respecto a horizontal / vertical';
+      $('#l-ang').textContent = fmt(Math.abs(L.dev)) + '°';
+      const ok = Math.abs(L.dev) <= 0.5;
+      $('#l-ang').classList.toggle('ok', ok);
+      const bar = $('#bar'), bb = $('#bbar');
+      const half = (bar.clientWidth - bb.clientWidth) / 2;
+      bb.style.transform = 'translate(calc(-50% + ' + (clamp(L.dev / 10, -1, 1) * half).toFixed(1) + 'px), -50%)';
+      bb.classList.toggle('ok', ok);
+    } else {
+      wc.style.display = 'flex'; wb.style.display = 'none'; $('#xy').style.display = 'flex';
+      $('#l-mode').textContent = 'Superficie plana';
+      $('#l-hint').textContent = 'Inclinación total';
+      $('#l-ang').textContent = fmt(L.total) + '°';
+      const ok = L.total <= 0.5;
+      $('#l-ang').classList.toggle('ok', ok);
+      $('#l-x').textContent = fmt(L.x) + '°';
+      $('#l-y').textContent = fmt(L.y) + '°';
+      const c = $('#circle'), b = $('#bub');
+      const R = (c.clientWidth - b.clientWidth) / 2;
+      let bx = L.x / 10, by = L.y / 10;
+      const m = Math.hypot(bx, by); if (m > 1) { bx /= m; by /= m; }
+      b.style.transform = 'translate(calc(-50% + ' + (bx*R).toFixed(1) + 'px), calc(-50% + ' + (-by*R).toFixed(1) + 'px))';
+      b.classList.toggle('ok', ok);
+    }
+  }
+
+  function loop(){
+    if (u) { if (view === 'bench') renderBench(); else renderLevel(); }
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Controles ----------
+  function renderChips(){
+    const box = $('#chips'); box.innerHTML = '';
+    const none = document.createElement('button');
+    none.className = 'chip' + (target === null ? ' on' : ''); none.textContent = 'Ninguno';
+    none.onclick = () => { target = null; save(); renderChips(); };
+    box.appendChild(none);
+    TARGETS.forEach(v => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (target === v ? ' on' : '');
+      b.textContent = v + '°';
+      b.onclick = () => { target = v; wasOk = false; save(); renderChips(); };
+      box.appendChild(b);
+    });
+    if (target !== null && !TARGETS.includes(target)) {
+      const b = document.createElement('button');
+      b.className = 'chip on'; b.textContent = fmt(target) + '°';
+      box.appendChild(b);
+    }
+  }
+  $('#c-set').onclick = () => {
+    const v = parseFloat(String($('#c-val').value).replace(',', '.'));
+    if (isFinite(v) && v >= -45 && v <= 90) { target = Math.round(v * 10) / 10; wasOk = false; save(); renderChips(); $('#c-val').value = ''; $('#c-val').blur(); }
+  };
+
+  function toggleHold(){
+    hold = !hold;
+    ['#btn-hold', '#btn-hold2'].forEach(s => { const b = $(s); b.textContent = hold ? 'Soltar' : 'Retener'; b.classList.toggle('hold', hold); b.classList.toggle('pri', !hold); });
+    ['#b-hold', '#l-hold'].forEach(s => $(s).classList.toggle('on', hold));
+    if (navigator.vibrate) { try { navigator.vibrate(30); } catch (e) {} }
+  }
+  $('#btn-hold').onclick = toggleHold;
+  $('#btn-hold2').onclick = toggleHold;
+  $('#b-ang').onclick = toggleHold;
+
+  const openCal = () => { $('#ov-cal').hidden = false; };
+  $('#btn-cal').onclick = openCal;
+  $('#btn-cal2').onclick = openCal;
+  $('#cal-close').onclick = () => { $('#ov-cal').hidden = true; };
+  $('#cal-reset').onclick = () => { u0 = [0, 0, 1]; save(); hist = []; $('#ov-cal').hidden = true; };
+  $('#cal-now').onclick = () => {
+    if (u) { u0 = u.slice(); save(); hist = []; if (navigator.vibrate) { try { navigator.vibrate([40, 60, 40]); } catch (e) {} } }
+    $('#ov-cal').hidden = true;
+  };
+
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    view = t.dataset.v;
+    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+    $('#v-bench').classList.toggle('on', view === 'bench');
+    $('#v-level').classList.toggle('on', view === 'level');
+  });
+
+  $('#btn-start').onclick = start;
+  renderChips();
+})();
+</script>
+</body>
+</html>
