@@ -16,6 +16,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);display:flex;flex-direction:column;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+input{-webkit-user-select:text;user-select:text}
 header{display:flex;gap:8px;padding:12px 12px 8px}
 .tab{flex:1;padding:12px;border:0;border-radius:12px;background:var(--card);color:var(--mut);font-size:17px;font-weight:600}
 .tab.on{background:var(--acc);color:#fff}
@@ -32,20 +33,40 @@ main{flex:1;display:flex;flex-direction:column;padding:0 12px 12px;min-height:0}
 .hint{text-align:center;color:var(--mut);font-size:13px;line-height:1.35;margin-top:8px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .badge{font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;background:var(--card2);color:var(--mut)}
-.badge.on{background:var(--warn);color:#000}
 .badge.st{background:rgba(52,199,89,.18);color:var(--ok)}
 svg{display:block;width:100%;height:auto}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{flex:1 0 auto;min-width:56px;padding:10px 8px;border:0;border-radius:10px;background:var(--card2);color:var(--txt);font-size:16px;font-weight:600}
+.chip{flex:1 0 auto;min-width:52px;padding:10px 8px;border:0;border-radius:10px;background:var(--card2);color:var(--txt);font-size:16px;font-weight:600}
 .chip.on{background:var(--acc);color:#fff}
-.lbl{font-size:13px;color:var(--mut);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.diff{text-align:center;font-size:22px;font-weight:700;margin-top:10px;min-height:28px}
-.diff.ok{color:var(--ok)}.diff.up{color:var(--warn)}.diff.down{color:var(--warn)}
+.chip.add{background:transparent;border:1.5px dashed #3a404c;color:var(--mut)}
+.chip small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
+.exs .chip{text-align:left;flex:1 1 calc(50% - 6px);padding:10px 12px}
+.lbl{font-size:13px;color:var(--mut);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px}
+.lbl.mt{margin-top:14px}
+.lblrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.lblrow .lbl{margin:0}
+.link{border:0;background:none;color:var(--acc);font-size:15px;font-weight:600;padding:4px 0}
+.ex-name{text-align:center;font-size:17px;font-weight:700;margin-top:8px;min-height:22px}
+.diff{text-align:center;font-size:22px;font-weight:700;margin-top:4px;min-height:28px}
+.diff.ok{color:var(--ok)}.diff.up,.diff.down{color:var(--warn)}
+.sugg{text-align:center;font-size:16px;margin-top:6px;color:var(--txt)}
+.sugg:empty{display:none}
+.sugg b{color:var(--acc)}
 .btns{display:flex;gap:8px;margin-top:auto}
 .btn{flex:1;padding:16px;border:0;border-radius:14px;background:var(--card2);color:var(--txt);font-size:17px;font-weight:600}
 .btn.pri{background:var(--acc);color:#fff}
+.btn.danger{background:transparent;color:var(--bad);border:1.5px solid rgba(255,90,95,.4)}
+.btn.sm{padding:12px;font-size:16px}
 .custom{display:flex;gap:6px;margin-top:8px}
-.custom input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #333a46;background:var(--bg);color:var(--txt);font-size:16px}
+.custom input,.fld input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #333a46;background:var(--bg);color:var(--txt);font-size:16px}
+.pos{list-style:none;margin:0;padding:0}
+.pos li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--card2);margin-bottom:6px}
+.pos li.best{background:rgba(77,163,255,.22);outline:2px solid var(--acc)}
+.pos li.in{background:rgba(52,199,89,.14)}
+.pos .pl{flex:1;font-weight:600}
+.pos .pa{font-variant-numeric:tabular-nums;font-weight:700}
+.x{border:0;background:none;color:var(--mut);font-size:18px;padding:2px 6px}
+.empty{color:var(--mut);font-size:14px;margin:4px 0 10px}
 /* Nivel */
 .levelwrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
 .circle{position:relative;width:min(80vw,46vh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#1f2a1f 0%,#18201a 70%,#141915 100%);border:3px solid #2c3a2e;overflow:hidden}
@@ -61,12 +82,20 @@ svg{display:block;width:100%;height:auto}
 .xy b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
 .xy span{font-size:13px;color:var(--mut)}
 /* Superposiciones */
-.ov{position:fixed;inset:0;background:rgba(10,11,14,.94);display:flex;align-items:center;justify-content:center;padding:24px;z-index:10}
+.ov{position:fixed;inset:0;background:rgba(10,11,14,.94);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
 .ov[hidden]{display:none}
-.ov .box{max-width:420px;width:100%;background:var(--card);border-radius:20px;padding:22px;text-align:center}
+.ov .box{max-width:420px;width:100%;max-height:100%;overflow-y:auto;background:var(--card);border-radius:20px;padding:22px;text-align:center}
 .ov h2{margin:0 0 10px;font-size:22px}
-.ov p{color:var(--mut);font-size:16px;line-height:1.45;margin:0 0 18px}
+.ov p{color:var(--mut);font-size:16px;line-height:1.45;margin:0 0 16px}
 .ov .btn{width:100%;margin-top:8px}
+.fld{display:flex;flex-direction:column;gap:6px;text-align:left;margin-bottom:12px}
+.fld label{font-size:14px;color:var(--mut)}
+.fld2{display:flex;gap:8px}
+.fld2 .fld{flex:1}
+.mlist{list-style:none;margin:0 0 12px;padding:0;text-align:left}
+.mlist li{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--card2);margin-bottom:6px}
+.mlist .pl{flex:1;font-weight:600}
+.mlist small{color:var(--mut);font-weight:500}
 .msg{color:var(--bad);font-size:15px;margin-top:10px}
 </style>
 </head>
@@ -87,21 +116,26 @@ svg{display:block;width:100%;height:auto}
         <span class="badge" id="b-stable">Moviendo…</span>
       </div>
       <div class="big" id="b-ang">0,0°</div>
-            <svg viewBox="0 0 240 125" aria-hidden="true">
+      <svg viewBox="0 -38 240 163" aria-hidden="true" style="max-height:34vh">
         <line x1="10" y1="118" x2="230" y2="118" stroke="#3a404c" stroke-width="3" stroke-linecap="round"/>
         <line x1="185" y1="80" x2="185" y2="118" stroke="#3a404c" stroke-width="5"/>
         <line x1="140" y1="80" x2="140" y2="118" stroke="#3a404c" stroke-width="5"/>
-        <line id="s-target" x1="150" y1="80" x2="30" y2="80" stroke="#4da3ff" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" opacity="0"/>
+        <line id="s-t1" x1="150" y1="80" x2="30" y2="80" stroke="#4da3ff" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" opacity="0"/>
+        <line id="s-t2" x1="150" y1="80" x2="30" y2="80" stroke="#4da3ff" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" opacity="0"/>
         <line x1="150" y1="80" x2="210" y2="80" stroke="#cfd3da" stroke-width="10" stroke-linecap="round"/>
         <line id="s-back" x1="150" y1="80" x2="30" y2="80" stroke="#cfd3da" stroke-width="10" stroke-linecap="round"/>
         <circle cx="150" cy="80" r="5" fill="#0f1115"/>
       </svg>
+      <div class="ex-name" id="b-ex"></div>
       <div class="diff" id="b-diff"></div>
+      <div class="sugg" id="b-sugg"></div>
       <div class="hint">Móvil boca arriba sobre el respaldo, con la parte de arriba hacia la cabeza</div>
     </div>
 
     <div class="card">
-      <div class="lbl">Ángulo objetivo</div>
+      <div class="lblrow"><div class="lbl">Mis ejercicios</div><button class="link" id="ex-edit">Editar</button></div>
+      <div class="chips exs" id="ex-chips"></div>
+      <div class="lbl mt">Ángulo suelto</div>
       <div class="chips" id="chips"></div>
       <div class="custom">
         <input id="c-val" type="number" inputmode="decimal" step="1" min="0" max="90" placeholder="Otro ángulo (p. ej. 37)">
@@ -109,8 +143,14 @@ svg{display:block;width:100%;height:auto}
       </div>
     </div>
 
+    <div class="card">
+      <div class="lblrow"><div class="lbl">Mis bancos</div><button class="link" id="bench-edit">Renombrar / borrar</button></div>
+      <div class="chips" id="bench-chips"></div>
+      <div id="bench-body"></div>
+    </div>
+
     <div class="btns">
-      <button class="btn pri" id="btn-cal">Calibrar</button>
+      <button class="btn" id="btn-cal">Calibrar</button>
     </div>
   </section>
 
@@ -133,7 +173,7 @@ svg{display:block;width:100%;height:auto}
         <div class="bubble" id="bub"></div>
       </div>
     </div>
-    <div class="levelwrap" id="w-bar" hidden style="display:none">
+    <div class="levelwrap" id="w-bar" style="display:none">
       <div class="bar" id="bar">
         <div class="mk" style="left:calc(50% - 22px)"></div>
         <div class="mk" style="left:calc(50% + 20px)"></div>
@@ -147,7 +187,7 @@ svg{display:block;width:100%;height:auto}
     </div>
 
     <div class="btns">
-      <button class="btn pri" id="btn-cal2">Calibrar</button>
+      <button class="btn" id="btn-cal2">Calibrar</button>
     </div>
   </section>
 </main>
@@ -183,33 +223,68 @@ svg{display:block;width:100%;height:auto}
   </div>
 </div>
 
+<!-- Ventana genérica -->
+<div class="ov" id="ov-dlg" hidden>
+  <div class="box" id="dlg-box"></div>
+</div>
+
 <script>
 (function(){
   const $ = s => document.querySelector(s);
   const D = Math.PI / 180;
   const TOL = 1.0;               // tolerancia en grados para dar el objetivo por bueno
   const TARGETS = [0, 15, 30, 45, 60, 75, 90];
+  const SEED_EX = [              // ejercicios de la rutina que usan banco regulable
+    {name: 'Curl inclinado con mancuernas', min: 45, max: 60},
+    {name: 'Y-raise con apoyo en pecho', min: 30, max: 45}
+  ];
 
+  // ---------- Estado guardado ----------
   let u = null;                  // vector "arriba" filtrado, en coordenadas del móvil
-  let u0 = [0, 0, 1];            // referencia de calibración
-  let target = null;
-  let view = 'bench';
-  let wasOk = false;
-  let gotEvent = false;
-  let hist = [];
-  let wakeLock = null;
-
+  let cfg = {u0: [0, 0, 1], active: null, exercises: null, benches: [], benchSel: null};
   try {
     const s = JSON.parse(localStorage.getItem('nivel_cfg') || '{}');
-    if (Array.isArray(s.u0) && s.u0.length === 3) u0 = s.u0;
-    if (typeof s.target === 'number' && s.target >= 0) target = s.target;
+    if (Array.isArray(s.u0) && s.u0.length === 3) cfg.u0 = s.u0;
+    if (s.active && typeof s.active.min === 'number') cfg.active = s.active;
+    else if (typeof s.target === 'number' && s.target >= 0) cfg.active = {min: s.target, max: s.target};
+    if (Array.isArray(s.exercises)) cfg.exercises = s.exercises;
+    if (Array.isArray(s.benches)) cfg.benches = s.benches;
+    if (s.benchSel) cfg.benchSel = s.benchSel;
   } catch (e) {}
-  function save(){ try { localStorage.setItem('nivel_cfg', JSON.stringify({u0, target})); } catch (e) {} }
+  if (!cfg.exercises) cfg.exercises = SEED_EX.map(x => ({...x}));
+  function save(){ try { localStorage.setItem('nivel_cfg', JSON.stringify(cfg)); } catch (e) {} }
+
+  let view = 'bench', wasOk = false, gotEvent = false, hist = [], wakeLock = null, shown = 0;
 
   const nf = new Intl.NumberFormat('es-ES', {minimumFractionDigits:1, maximumFractionDigits:1});
   const fmt = x => nf.format(Math.abs(x) < 0.05 ? 0 : x);
+  const fmtInt = x => (Math.round(x * 10) / 10).toLocaleString('es-ES');
   const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
   const dot = (a, b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const rangeTxt = t => t.min === t.max ? fmtInt(t.min) + '°' : fmtInt(t.min) + '–' + fmtInt(t.max) + '°';
+  const uid = () => Math.random().toString(36).slice(2, 9);
+
+  // ---------- Enlace desde otra app (p. ej. la de técnica) ----------
+  // ?ej=Nombre&min=45&max=60   o   ?angulo=30
+  (function fromUrl(){
+    const q = new URLSearchParams(location.search);
+    let min = parseFloat(q.get('min')), max = parseFloat(q.get('max'));
+    const one = parseFloat(q.get('angulo'));
+    if (isFinite(one)) { min = max = one; }
+    if (!isFinite(min)) return;
+    if (!isFinite(max)) max = min;
+    if (max < min) [min, max] = [max, min];
+    min = clamp(min, 0, 90); max = clamp(max, 0, 90);
+    const name = (q.get('ej') || '').trim();
+    if (name) {
+      const ex = cfg.exercises.find(e => e.name.toLowerCase() === name.toLowerCase());
+      if (ex) { ex.min = min; ex.max = max; } else cfg.exercises.push({name, min, max});
+      cfg.active = {name, min, max};
+    } else cfg.active = {min, max};
+    save();
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  })();
 
   // ---------- Sensor ----------
   function onOri(e){
@@ -271,19 +346,36 @@ svg{display:block;width:100%;height:auto}
 
   // ---------- Banco ----------
   function benchAngle(){
-    const th = Math.acos(clamp(dot(u, u0), -1, 1)) / D;
-    const sign = (u[1] - u0[1]) >= 0 ? 1 : -1;
+    const th = Math.acos(clamp(dot(u, cfg.u0), -1, 1)) / D;
+    const sign = (u[1] - cfg.u0[1]) >= 0 ? 1 : -1;
     return th * sign;
   }
 
   function drawBack(el, ang){
-    const L = 120, px = 150, py = 80;
+    const L = 110, px = 150, py = 80;
     const a = ang * D;
     el.setAttribute('x2', (px - L*Math.cos(a)).toFixed(1));
     el.setAttribute('y2', (py - L*Math.sin(a)).toFixed(1));
   }
 
-  let shown = 0;
+  // distancia de un ángulo al rango objetivo (0 si está dentro)
+  const distTo = (a, t) => a < t.min ? t.min - a : (a > t.max ? a - t.max : 0);
+
+  function curBench(){ return cfg.benches.find(b => b.id === cfg.benchSel) || null; }
+
+  // mejor posición del banco elegido para el objetivo activo
+  function bestPosition(){
+    const b = curBench(), t = cfg.active;
+    if (!b || !t || !b.positions.length) return null;
+    const mid = (t.min + t.max) / 2;
+    let best = null;
+    b.positions.forEach(p => {
+      const d = distTo(p.angle, t), dm = Math.abs(p.angle - mid);
+      if (!best || d < best.d - 1e-9 || (Math.abs(d - best.d) < 1e-9 && dm < best.dm)) best = {p, d, dm};
+    });
+    return best;
+  }
+
   function renderBench(){
     shown = benchAngle();
     const a = shown;
@@ -295,25 +387,25 @@ svg{display:block;width:100%;height:auto}
     if (Math.abs(a) < 0.5) st.textContent = 'Plano';
     else st.textContent = a > 0 ? 'Inclinado' : 'Declinado';
 
-    const t = $('#s-target'), d = $('#b-diff');
-    if (target === null) {
-      t.setAttribute('opacity', '0');
+    const t = cfg.active, d = $('#b-diff'), l1 = $('#s-t1'), l2 = $('#s-t2');
+    if (!t) {
+      l1.setAttribute('opacity', '0'); l2.setAttribute('opacity', '0');
       d.textContent = ''; d.className = 'diff'; big.classList.remove('ok');
     } else {
-      t.setAttribute('opacity', '1');
-      drawBack(t, target);
-      const diff = a - target;
-      const ok = Math.abs(diff) <= TOL;
+      l1.setAttribute('opacity', '1'); drawBack(l1, t.min);
+      l2.setAttribute('opacity', t.max !== t.min ? '1' : '0'); drawBack(l2, t.max);
+      const ok = a >= t.min - TOL && a <= t.max + TOL;
       big.classList.toggle('ok', ok);
-      if (ok) { d.textContent = '✓ En ' + fmt(target) + '°'; d.className = 'diff ok'; }
-      else if (diff < 0) { d.textContent = '↑ Sube ' + fmt(-diff) + '°'; d.className = 'diff up'; }
-      else { d.textContent = '↓ Baja ' + fmt(diff) + '°'; d.className = 'diff down'; }
+      if (ok) { d.textContent = '✓ En ' + rangeTxt(t); d.className = 'diff ok'; }
+      else if (a < t.min) { d.textContent = '↑ Sube ' + fmt(t.min - a) + '°'; d.className = 'diff up'; }
+      else { d.textContent = '↓ Baja ' + fmt(a - t.max) + '°'; d.className = 'diff down'; }
       if (ok && !wasOk && navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
       wasOk = ok;
     }
+    $('#save-pos-ang') && ($('#save-pos-ang').textContent = fmt(a) + '°');
 
     // estabilidad
-    hist.push(benchAngle()); if (hist.length > 40) hist.shift();
+    hist.push(a); if (hist.length > 40) hist.shift();
     const rng = Math.max(...hist) - Math.min(...hist);
     const sb = $('#b-stable');
     if (hist.length >= 40 && rng < 0.3) { sb.textContent = 'Estable'; sb.className = 'badge st'; }
@@ -321,47 +413,38 @@ svg{display:block;width:100%;height:auto}
   }
 
   // ---------- Nivel ----------
-  let lshown = {edge:false, total:0, x:0, y:0, dev:0};
   function renderLevel(){
-    {
-      const edge = Math.abs(u[2]) < 0.6;
-      const s = toScreen(u), s0 = toScreen(u0);
-      if (edge) {
-        const dev0 = Math.atan2(s[0], s[1]) / D;
-        const dev = dev0 - Math.round(dev0 / 90) * 90;
-        lshown = {edge:true, dev};
-      } else {
-        const x = (Math.asin(clamp(s[0], -1, 1)) - Math.asin(clamp(s0[0], -1, 1))) / D;
-        const y = (Math.asin(clamp(s[1], -1, 1)) - Math.asin(clamp(s0[1], -1, 1))) / D;
-        const total = Math.acos(clamp(dot(u, u0), -1, 1)) / D;
-        lshown = {edge:false, total, x, y};
-      }
-    }
-    const L = lshown;
+    const edge = Math.abs(u[2]) < 0.6;
+    const s = toScreen(u), s0 = toScreen(cfg.u0);
     const wc = $('#w-circle'), wb = $('#w-bar');
-    if (L.edge) {
+    if (edge) {
+      const dev0 = Math.atan2(s[0], s[1]) / D;
+      const dev = dev0 - Math.round(dev0 / 90) * 90;
       wc.style.display = 'none'; wb.style.display = 'flex'; $('#xy').style.display = 'none';
       $('#l-mode').textContent = 'De canto';
       $('#l-hint').textContent = 'Desviación respecto a horizontal / vertical';
-      $('#l-ang').textContent = fmt(Math.abs(L.dev)) + '°';
-      const ok = Math.abs(L.dev) <= 0.5;
+      $('#l-ang').textContent = fmt(Math.abs(dev)) + '°';
+      const ok = Math.abs(dev) <= 0.5;
       $('#l-ang').classList.toggle('ok', ok);
       const bar = $('#bar'), bb = $('#bbar');
       const half = (bar.clientWidth - bb.clientWidth) / 2;
-      bb.style.transform = 'translate(calc(-50% + ' + (clamp(L.dev / 10, -1, 1) * half).toFixed(1) + 'px), -50%)';
+      bb.style.transform = 'translate(calc(-50% + ' + (clamp(dev / 10, -1, 1) * half).toFixed(1) + 'px), -50%)';
       bb.classList.toggle('ok', ok);
     } else {
+      const x = (Math.asin(clamp(s[0], -1, 1)) - Math.asin(clamp(s0[0], -1, 1))) / D;
+      const y = (Math.asin(clamp(s[1], -1, 1)) - Math.asin(clamp(s0[1], -1, 1))) / D;
+      const total = Math.acos(clamp(dot(u, cfg.u0), -1, 1)) / D;
       wc.style.display = 'flex'; wb.style.display = 'none'; $('#xy').style.display = 'flex';
       $('#l-mode').textContent = 'Superficie plana';
       $('#l-hint').textContent = 'Inclinación total';
-      $('#l-ang').textContent = fmt(L.total) + '°';
-      const ok = L.total <= 0.5;
+      $('#l-ang').textContent = fmt(total) + '°';
+      const ok = total <= 0.5;
       $('#l-ang').classList.toggle('ok', ok);
-      $('#l-x').textContent = fmt(L.x) + '°';
-      $('#l-y').textContent = fmt(L.y) + '°';
+      $('#l-x').textContent = fmt(x) + '°';
+      $('#l-y').textContent = fmt(y) + '°';
       const c = $('#circle'), b = $('#bub');
       const R = (c.clientWidth - b.clientWidth) / 2;
-      let bx = L.x / 10, by = L.y / 10;
+      let bx = x / 10, by = y / 10;
       const m = Math.hypot(bx, by); if (m > 1) { bx /= m; by /= m; }
       b.style.transform = 'translate(calc(-50% + ' + (bx*R).toFixed(1) + 'px), calc(-50% + ' + (-by*R).toFixed(1) + 'px))';
       b.classList.toggle('ok', ok);
@@ -373,39 +456,237 @@ svg{display:block;width:100%;height:auto}
     requestAnimationFrame(loop);
   }
 
-  // ---------- Controles ----------
-  function renderChips(){
+  // ---------- Ventana genérica ----------
+  // fields: [{id, label, type, value, placeholder}] · buttons: [{label, cls, val}]
+  function dialog({title, text, fields = [], buttons}){
+    return new Promise(res => {
+      const box = $('#dlg-box');
+      let h = '<h2>' + esc(title) + '</h2>' + (text ? '<p>' + text + '</p>' : '');
+      const pairs = [];
+      for (let i = 0; i < fields.length; i++) {
+        const f = fields[i];
+        const html = '<div class="fld"><label for="f-' + f.id + '">' + esc(f.label) + '</label><input id="f-' + f.id + '" type="' + (f.type || 'text') + '"' +
+          (f.type === 'number' ? ' inputmode="decimal" step="1"' : '') + ' value="' + esc(f.value ?? '') + '" placeholder="' + esc(f.placeholder || '') + '"></div>';
+        if (f.half && fields[i+1] && fields[i+1].half) {
+          const g = fields[i+1];
+          const html2 = '<div class="fld"><label for="f-' + g.id + '">' + esc(g.label) + '</label><input id="f-' + g.id + '" type="' + (g.type || 'text') + '"' +
+            (g.type === 'number' ? ' inputmode="decimal" step="1"' : '') + ' value="' + esc(g.value ?? '') + '" placeholder="' + esc(g.placeholder || '') + '"></div>';
+          pairs.push('<div class="fld2">' + html + html2 + '</div>'); i++;
+        } else pairs.push(html);
+      }
+      h += pairs.join('') + '<div class="msg" id="dlg-msg"></div>';
+      h += buttons.map((b, i) => '<button class="btn ' + (b.cls || '') + '" data-i="' + i + '">' + esc(b.label) + '</button>').join('');
+      box.innerHTML = h;
+      $('#ov-dlg').hidden = false;
+      const first = box.querySelector('input'); if (first) setTimeout(() => first.focus(), 50);
+      box.querySelectorAll('button[data-i]').forEach(btn => btn.onclick = () => {
+        const b = buttons[+btn.dataset.i];
+        const vals = {};
+        fields.forEach(f => { vals[f.id] = $('#f-' + f.id).value.trim(); });
+        if (b.validate) { const err = b.validate(vals); if (err) { $('#dlg-msg').textContent = err; return; } }
+        $('#ov-dlg').hidden = true;
+        res({val: b.val, vals});
+      });
+    });
+  }
+  const num = s => parseFloat(String(s).replace(',', '.'));
+
+  // ---------- Objetivo: ejercicios y ángulos ----------
+  function setActive(t){ cfg.active = t; wasOk = false; save(); renderTargets(); renderBenchCard(); }
+
+  function renderTargets(){
+    const t = cfg.active;
+    const exBox = $('#ex-chips'); exBox.innerHTML = '';
+    cfg.exercises.forEach(ex => {
+      const on = t && t.name === ex.name;
+      const b = document.createElement('button');
+      b.className = 'chip' + (on ? ' on' : '');
+      b.innerHTML = esc(ex.name) + '<small>' + rangeTxt(ex) + '</small>';
+      b.onclick = () => setActive(on ? null : {name: ex.name, min: ex.min, max: ex.max});
+      exBox.appendChild(b);
+    });
+    const add = document.createElement('button');
+    add.className = 'chip add'; add.textContent = '+ Añadir ejercicio';
+    add.onclick = () => editExercise(null);
+    exBox.appendChild(add);
+
     const box = $('#chips'); box.innerHTML = '';
     const none = document.createElement('button');
-    none.className = 'chip' + (target === null ? ' on' : ''); none.textContent = 'Ninguno';
-    none.onclick = () => { target = null; save(); renderChips(); };
+    none.className = 'chip' + (!t ? ' on' : ''); none.textContent = 'Ninguno';
+    none.onclick = () => setActive(null);
     box.appendChild(none);
     TARGETS.forEach(v => {
       const b = document.createElement('button');
-      b.className = 'chip' + (target === v ? ' on' : '');
+      b.className = 'chip' + (t && !t.name && t.min === v && t.max === v ? ' on' : '');
       b.textContent = v + '°';
-      b.onclick = () => { target = v; wasOk = false; save(); renderChips(); };
+      b.onclick = () => setActive({min: v, max: v});
       box.appendChild(b);
     });
-    if (target !== null && !TARGETS.includes(target)) {
+    if (t && !t.name && (t.min !== t.max || !TARGETS.includes(t.min))) {
       const b = document.createElement('button');
-      b.className = 'chip on'; b.textContent = fmt(target) + '°';
+      b.className = 'chip on'; b.textContent = rangeTxt(t);
       box.appendChild(b);
     }
+    $('#b-ex').textContent = t && t.name ? t.name + ' · ' + rangeTxt(t) : '';
   }
+
   $('#c-set').onclick = () => {
-    const v = parseFloat(String($('#c-val').value).replace(',', '.'));
-    if (isFinite(v) && v >= 0 && v <= 90) { target = Math.round(v * 10) / 10; wasOk = false; save(); renderChips(); $('#c-val').value = ''; $('#c-val').blur(); }
+    const v = num($('#c-val').value);
+    if (isFinite(v) && v >= 0 && v <= 90) { const r = Math.round(v * 10) / 10; setActive({min: r, max: r}); $('#c-val').value = ''; $('#c-val').blur(); }
   };
 
+  async function editExercise(ex){
+    const buttons = [{label: 'Guardar', cls: 'pri', val: 'ok', validate: v => {
+      if (!v.name) return 'Pon un nombre.';
+      const a = num(v.min), b = v.max === '' ? a : num(v.max);
+      if (!isFinite(a) || !isFinite(b) || a < 0 || b > 90 || a > 90 || b < 0) return 'Los ángulos van de 0 a 90.';
+      if (cfg.exercises.some(e => e !== ex && e.name.toLowerCase() === v.name.toLowerCase())) return 'Ya hay un ejercicio con ese nombre.';
+      return '';
+    }}];
+    if (ex) buttons.push({label: 'Borrar ejercicio', cls: 'danger', val: 'del'});
+    buttons.push({label: 'Cancelar', val: 'no'});
+    const r = await dialog({
+      title: ex ? 'Editar ejercicio' : 'Nuevo ejercicio',
+      text: 'Si el ángulo es fijo, deja «Hasta» vacío.',
+      fields: [
+        {id: 'name', label: 'Nombre', value: ex ? ex.name : '', placeholder: 'Press inclinado con mancuernas'},
+        {id: 'min', label: 'Desde (°)', type: 'number', value: ex ? ex.min : '', placeholder: '30', half: true},
+        {id: 'max', label: 'Hasta (°)', type: 'number', value: ex && ex.max !== ex.min ? ex.max : '', placeholder: 'opcional', half: true}
+      ],
+      buttons
+    });
+    if (r.val === 'ok') {
+      let a = num(r.vals.min), b = r.vals.max === '' ? a : num(r.vals.max);
+      if (b < a) [a, b] = [b, a];
+      const isNew = !ex;
+      const wasActive = !isNew && cfg.active && cfg.active.name === ex.name;
+      if (isNew) { ex = {name: r.vals.name, min: a, max: b}; cfg.exercises.push(ex); }
+      else { ex.name = r.vals.name; ex.min = a; ex.max = b; }
+      if (wasActive || isNew) { cfg.active = {name: ex.name, min: a, max: b}; wasOk = false; }
+      save(); renderTargets(); renderBenchCard();
+    } else if (r.val === 'del') {
+      cfg.exercises = cfg.exercises.filter(e => e !== ex);
+      if (cfg.active && cfg.active.name === ex.name) cfg.active = null;
+      save(); renderTargets(); renderBenchCard();
+    }
+  }
 
+  async function manageExercises(){
+    const box = $('#dlg-box');
+    const draw = () => {
+      box.innerHTML = '<h2>Mis ejercicios</h2><p>Toca uno para cambiar su nombre o su ángulo.</p><ul class="mlist">' +
+        cfg.exercises.map((e, i) => '<li data-i="' + i + '"><span class="pl">' + esc(e.name) + '<br><small>' + rangeTxt(e) + '</small></span><span>›</span></li>').join('') +
+        '</ul>' + (cfg.exercises.length ? '' : '<p class="empty">No tienes ejercicios guardados.</p>') +
+        '<button class="btn pri" id="m-add">+ Añadir ejercicio</button><button class="btn" id="m-close">Cerrar</button>';
+      box.querySelectorAll('li[data-i]').forEach(li => li.onclick = async () => { await editExercise(cfg.exercises[+li.dataset.i]); manageExercises(); });
+      $('#m-add').onclick = async () => { await editExercise(null); manageExercises(); };
+      $('#m-close').onclick = () => { $('#ov-dlg').hidden = true; };
+    };
+    draw();
+    $('#ov-dlg').hidden = false;
+  }
+  $('#ex-edit').onclick = manageExercises;
+
+  // ---------- Mis bancos ----------
+  function renderBenchCard(){
+    const chips = $('#bench-chips'); chips.innerHTML = '';
+    if (cfg.benchSel && !curBench()) cfg.benchSel = null;
+    if (!cfg.benchSel && cfg.benches.length) cfg.benchSel = cfg.benches[0].id;
+    cfg.benches.forEach(b => {
+      const c = document.createElement('button');
+      c.className = 'chip' + (b.id === cfg.benchSel ? ' on' : '');
+      c.textContent = b.name;
+      c.onclick = () => { cfg.benchSel = b.id; save(); renderBenchCard(); };
+      chips.appendChild(c);
+    });
+    const add = document.createElement('button');
+    add.className = 'chip add'; add.textContent = '+ Banco';
+    add.onclick = addBench;
+    chips.appendChild(add);
+    $('#bench-edit').style.visibility = cfg.benches.length ? 'visible' : 'hidden';
+
+    const body = $('#bench-body');
+    const b = curBench();
+    if (!b) {
+      body.innerHTML = '<p class="empty" style="margin-top:10px">Añade un banco y guarda el ángulo de cada posición (agujero o muesca). Las próximas veces te diré qué posición usar sin medir.</p>';
+      $('#b-sugg').innerHTML = '';
+      return;
+    }
+    const best = bestPosition(), t = cfg.active;
+    const sorted = b.positions.slice().sort((x, y) => x.angle - y.angle);
+    body.innerHTML = '<div class="lbl mt">Posiciones</div>' +
+      (sorted.length ? '<ul class="pos">' + sorted.map(p => {
+        const cls = best && best.p === p ? 'best' : (t && distTo(p.angle, t) <= TOL ? 'in' : '');
+        return '<li class="' + cls + '"><span class="pl">Posición ' + esc(p.label) + '</span><span class="pa">' + fmt(p.angle) + '°</span><button class="x" data-id="' + p.id + '" aria-label="Borrar">✕</button></li>';
+      }).join('') + '</ul>' : '<p class="empty">Todavía no hay posiciones. Pon el respaldo en una posición, el móvil encima y pulsa el botón.</p>') +
+      '<button class="btn pri sm" id="save-pos" style="width:100%;margin-top:4px">Guardar posición actual · <span id="save-pos-ang">' + fmt(shown) + '°</span></button>';
+    body.querySelectorAll('.x').forEach(x => x.onclick = async () => {
+      const p = b.positions.find(q => q.id === x.dataset.id);
+      const r = await dialog({title: 'Borrar posición ' + p.label, text: 'Se borrará la medida de ' + fmt(p.angle) + '° de ' + esc(b.name) + '.', buttons: [{label: 'Borrar', cls: 'danger', val: 'ok'}, {label: 'Cancelar', val: 'no'}]});
+      if (r.val === 'ok') { b.positions = b.positions.filter(q => q !== p); save(); renderBenchCard(); }
+    });
+    $('#save-pos').onclick = savePosition;
+
+    // sugerencia en la tarjeta principal
+    const sg = $('#b-sugg');
+    if (best && t) {
+      sg.innerHTML = esc(b.name) + ': usa la <b>posición ' + esc(best.p.label) + '</b> (' + fmt(best.p.angle) + '°)' +
+        (best.d > TOL ? ' · la más cercana' : '');
+    } else sg.innerHTML = '';
+  }
+
+  async function addBench(){
+    const r = await dialog({
+      title: 'Nuevo banco', text: 'Ponle un nombre que reconozcas en el gimnasio.',
+      fields: [{id: 'name', label: 'Nombre', value: 'Banco ' + (cfg.benches.length + 1), placeholder: 'Banco junto a las mancuernas'}],
+      buttons: [{label: 'Añadir', cls: 'pri', val: 'ok', validate: v => v.name ? '' : 'Pon un nombre.'}, {label: 'Cancelar', val: 'no'}]
+    });
+    if (r.val !== 'ok') return;
+    const b = {id: uid(), name: r.vals.name, positions: []};
+    cfg.benches.push(b); cfg.benchSel = b.id; save(); renderBenchCard();
+  }
+
+  async function savePosition(){
+    const b = curBench(); if (!b) return;
+    if (!u) return;
+    const ang = Math.round(benchAngle() * 10) / 10;
+    const stable = hist.length >= 40 && (Math.max(...hist) - Math.min(...hist)) < 0.3;
+    const used = new Set(b.positions.map(p => p.label));
+    let n = b.positions.length + 1; while (used.has(String(n))) n++;
+    const r = await dialog({
+      title: 'Guardar posición', text: esc(b.name) + ': <b>' + fmt(ang) + '°</b>' + (stable ? '' : '<br>Ojo: la lectura aún se movía; si quieres, cancela y espera a ver «Estable».'),
+      fields: [{id: 'label', label: 'Nombre de la posición (número de agujero o muesca)', value: String(n)}],
+      buttons: [{label: 'Guardar', cls: 'pri', val: 'ok', validate: v => v.label ? '' : 'Pon un nombre o número.'}, {label: 'Cancelar', val: 'no'}]
+    });
+    if (r.val !== 'ok') return;
+    const ex = b.positions.find(p => p.label === r.vals.label);
+    if (ex) ex.angle = ang; else b.positions.push({id: uid(), label: r.vals.label, angle: ang});
+    save(); renderBenchCard();
+    if (navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} }
+  }
+
+  $('#bench-edit').onclick = async () => {
+    const b = curBench(); if (!b) return;
+    const r = await dialog({
+      title: 'Editar banco',
+      fields: [{id: 'name', label: 'Nombre', value: b.name}],
+      buttons: [{label: 'Guardar nombre', cls: 'pri', val: 'ok', validate: v => v.name ? '' : 'Pon un nombre.'}, {label: 'Borrar banco y sus posiciones', cls: 'danger', val: 'del'}, {label: 'Cancelar', val: 'no'}]
+    });
+    if (r.val === 'ok') { b.name = r.vals.name; save(); renderBenchCard(); }
+    else if (r.val === 'del') {
+      const c = await dialog({title: '¿Borrar ' + b.name + '?', text: 'Se perderán sus ' + b.positions.length + ' posiciones guardadas.', buttons: [{label: 'Borrar', cls: 'danger', val: 'ok'}, {label: 'Cancelar', val: 'no'}]});
+      if (c.val === 'ok') { cfg.benches = cfg.benches.filter(x => x !== b); cfg.benchSel = null; save(); renderBenchCard(); }
+    }
+  };
+
+  // ---------- Calibración y pestañas ----------
   const openCal = () => { $('#ov-cal').hidden = false; };
   $('#btn-cal').onclick = openCal;
   $('#btn-cal2').onclick = openCal;
   $('#cal-close').onclick = () => { $('#ov-cal').hidden = true; };
-  $('#cal-reset').onclick = () => { u0 = [0, 0, 1]; save(); hist = []; $('#ov-cal').hidden = true; };
+  $('#cal-reset').onclick = () => { cfg.u0 = [0, 0, 1]; save(); hist = []; $('#ov-cal').hidden = true; };
   $('#cal-now').onclick = () => {
-    if (u) { u0 = u.slice(); save(); hist = []; if (navigator.vibrate) { try { navigator.vibrate([40, 60, 40]); } catch (e) {} } }
+    if (u) { cfg.u0 = u.slice(); save(); hist = []; if (navigator.vibrate) { try { navigator.vibrate([40, 60, 40]); } catch (e) {} } }
     $('#ov-cal').hidden = true;
   };
 
@@ -441,7 +722,9 @@ svg{display:block;width:100%;height:auto}
   }
 
   $('#btn-start').onclick = start;
-  renderChips();
+  save();
+  renderTargets();
+  renderBenchCard();
 })();
 </script>
 </body>
