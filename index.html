@@ -33,7 +33,6 @@ main{flex:1;display:flex;flex-direction:column;padding:0 12px 12px;min-height:0}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .badge{font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;background:var(--card2);color:var(--mut)}
 .badge.on{background:var(--warn);color:#000}
-#b-hold:not(.on),#l-hold:not(.on){visibility:hidden}
 .badge.st{background:rgba(52,199,89,.18);color:var(--ok)}
 svg{display:block;width:100%;height:auto}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -45,7 +44,6 @@ svg{display:block;width:100%;height:auto}
 .btns{display:flex;gap:8px;margin-top:auto}
 .btn{flex:1;padding:16px;border:0;border-radius:14px;background:var(--card2);color:var(--txt);font-size:17px;font-weight:600}
 .btn.pri{background:var(--acc);color:#fff}
-.btn.hold{background:var(--warn);color:#000}
 .custom{display:flex;gap:6px;margin-top:8px}
 .custom input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #333a46;background:var(--bg);color:var(--txt);font-size:16px}
 /* Nivel */
@@ -87,7 +85,6 @@ svg{display:block;width:100%;height:auto}
       <div class="row">
         <span class="badge" id="b-state">Plano</span>
         <span class="badge" id="b-stable">Moviendo…</span>
-        <span class="badge" id="b-hold">RETENIDO</span>
       </div>
       <div class="big" id="b-ang">0,0°</div>
             <svg viewBox="0 0 240 125" aria-hidden="true">
@@ -107,14 +104,13 @@ svg{display:block;width:100%;height:auto}
       <div class="lbl">Ángulo objetivo</div>
       <div class="chips" id="chips"></div>
       <div class="custom">
-        <input id="c-val" type="number" inputmode="decimal" step="1" min="-45" max="90" placeholder="Otro ángulo (p. ej. 37)">
+        <input id="c-val" type="number" inputmode="decimal" step="1" min="0" max="90" placeholder="Otro ángulo (p. ej. 37)">
         <button class="chip" id="c-set" style="flex:0 0 auto">Fijar</button>
       </div>
     </div>
 
     <div class="btns">
-      <button class="btn" id="btn-cal">Calibrar</button>
-      <button class="btn pri" id="btn-hold">Retener</button>
+      <button class="btn pri" id="btn-cal">Calibrar</button>
     </div>
   </section>
 
@@ -123,7 +119,6 @@ svg{display:block;width:100%;height:auto}
     <div class="card">
       <div class="row">
         <span class="badge" id="l-mode">Superficie plana</span>
-        <span class="badge" id="l-hold">RETENIDO</span>
       </div>
       <div class="big" id="l-ang">0,0°</div>
       <div class="sub" id="l-hint">Inclinación total</div>
@@ -152,8 +147,7 @@ svg{display:block;width:100%;height:auto}
     </div>
 
     <div class="btns">
-      <button class="btn" id="btn-cal2">Calibrar</button>
-      <button class="btn pri" id="btn-hold2">Retener</button>
+      <button class="btn pri" id="btn-cal2">Calibrar</button>
     </div>
   </section>
 </main>
@@ -194,12 +188,11 @@ svg{display:block;width:100%;height:auto}
   const $ = s => document.querySelector(s);
   const D = Math.PI / 180;
   const TOL = 1.0;               // tolerancia en grados para dar el objetivo por bueno
-  const TARGETS = [-15, 0, 15, 30, 45, 60, 75, 90];
+  const TARGETS = [0, 15, 30, 45, 60, 75, 90];
 
   let u = null;                  // vector "arriba" filtrado, en coordenadas del móvil
   let u0 = [0, 0, 1];            // referencia de calibración
   let target = null;
-  let hold = false;
   let view = 'bench';
   let wasOk = false;
   let gotEvent = false;
@@ -209,7 +202,7 @@ svg{display:block;width:100%;height:auto}
   try {
     const s = JSON.parse(localStorage.getItem('nivel_cfg') || '{}');
     if (Array.isArray(s.u0) && s.u0.length === 3) u0 = s.u0;
-    if (typeof s.target === 'number') target = s.target;
+    if (typeof s.target === 'number' && s.target >= 0) target = s.target;
   } catch (e) {}
   function save(){ try { localStorage.setItem('nivel_cfg', JSON.stringify({u0, target})); } catch (e) {} }
 
@@ -292,7 +285,7 @@ svg{display:block;width:100%;height:auto}
 
   let shown = 0;
   function renderBench(){
-    if (!hold) shown = benchAngle();
+    shown = benchAngle();
     const a = shown;
     const big = $('#b-ang');
     big.textContent = fmt(a) + '°';
@@ -315,7 +308,7 @@ svg{display:block;width:100%;height:auto}
       if (ok) { d.textContent = '✓ En ' + fmt(target) + '°'; d.className = 'diff ok'; }
       else if (diff < 0) { d.textContent = '↑ Sube ' + fmt(-diff) + '°'; d.className = 'diff up'; }
       else { d.textContent = '↓ Baja ' + fmt(diff) + '°'; d.className = 'diff down'; }
-      if (ok && !wasOk && !hold && navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
+      if (ok && !wasOk && navigator.vibrate) { try { navigator.vibrate(80); } catch (e) {} }
       wasOk = ok;
     }
 
@@ -330,7 +323,7 @@ svg{display:block;width:100%;height:auto}
   // ---------- Nivel ----------
   let lshown = {edge:false, total:0, x:0, y:0, dev:0};
   function renderLevel(){
-    if (!hold) {
+    {
       const edge = Math.abs(u[2]) < 0.6;
       const s = toScreen(u), s0 = toScreen(u0);
       if (edge) {
@@ -402,18 +395,9 @@ svg{display:block;width:100%;height:auto}
   }
   $('#c-set').onclick = () => {
     const v = parseFloat(String($('#c-val').value).replace(',', '.'));
-    if (isFinite(v) && v >= -45 && v <= 90) { target = Math.round(v * 10) / 10; wasOk = false; save(); renderChips(); $('#c-val').value = ''; $('#c-val').blur(); }
+    if (isFinite(v) && v >= 0 && v <= 90) { target = Math.round(v * 10) / 10; wasOk = false; save(); renderChips(); $('#c-val').value = ''; $('#c-val').blur(); }
   };
 
-  function toggleHold(){
-    hold = !hold;
-    ['#btn-hold', '#btn-hold2'].forEach(s => { const b = $(s); b.textContent = hold ? 'Soltar' : 'Retener'; b.classList.toggle('hold', hold); b.classList.toggle('pri', !hold); });
-    ['#b-hold', '#l-hold'].forEach(s => $(s).classList.toggle('on', hold));
-    if (navigator.vibrate) { try { navigator.vibrate(30); } catch (e) {} }
-  }
-  $('#btn-hold').onclick = toggleHold;
-  $('#btn-hold2').onclick = toggleHold;
-  $('#b-ang').onclick = toggleHold;
 
   const openCal = () => { $('#ov-cal').hidden = false; };
   $('#btn-cal').onclick = openCal;
